@@ -6,6 +6,8 @@
  * Fourth Task – calculates the average value. All this tasks should print the values to console.
  */
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MultiThreading.Task2.Chaining
 {
@@ -21,9 +23,39 @@ namespace MultiThreading.Task2.Chaining
             Console.WriteLine("Fourth Task – calculates the average value. All this tasks should print the values to console");
             Console.WriteLine();
 
-            // feel free to add your code
+            var task1 = Task.Run(() => GenerateRandomArray());
+
+            var multiples = task1.ContinueWith(x => MultiplyArray(task1.Result));
+
+            var orderedArray = multiples.ContinueWith(x => multiples.Result.OrderBy(t => t));
+
+            var avg = orderedArray.ContinueWith(x => orderedArray.Result.Average(t => t));
+
+            Console.WriteLine(avg.Result);
 
             Console.ReadLine();
+        }
+        private static int[] GenerateRandomArray()
+        {
+            var rnd = new Random();
+            var array = new int[10];
+            for (int i = 0; i < 10; i++)
+            {
+                array[i] = rnd.Next(10, 100);
+            }
+            Console.WriteLine(string.Join(", ", array));
+            return array;
+        }
+        private static int[] MultiplyArray(int[] array1)
+        {
+            int[] array2 = GenerateRandomArray();
+            int[] multiple = new int[array1.Length];
+            for (int i = 0; i < 10; i++)
+            {
+                multiple[i] = array1[i] * array2[i];
+            }
+            Console.WriteLine(string.Join(", ", multiple));
+            return multiple;
         }
     }
 }
