@@ -81,6 +81,6 @@ Task Parallel Library
 <hr/>
 
 #### Score board:
-0-59% – 5 of 6 required tasks completed and implementation meets all requirements.
-60-79% – All 6 required tasks completed, all tests are GREEN and implementation meets all requirements.
-80-100% – No major remarks related to clean code principles (SOLID, KISS, DRY, etc.) / Optional task is covered.
+- 0-59% – 5 of 6 required tasks completed and implementation meets all requirements.
+- 60-79% – All 6 required tasks completed, all tests are GREEN and implementation meets all requirements.
+- 80-100% – No major remarks related to clean code principles (SOLID, KISS, DRY, etc.) / Optional task is covered.
