@@ -14,16 +14,43 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
             TestMatrix3On3(new MatricesMultiplier());
             TestMatrix3On3(new MatricesMultiplierParallel());
         }
-
+        
         [TestMethod]
         public void ParallelEfficiencyTest()
         {
-            // todo: implement a test method to check the size of the matrix which makes parallel multiplication more effective than
-            // todo: the regular one
+            // implement a test method to check the size of the matrix which makes parallel multiplication more effective than the regular one
+            long synchronousTime = 0;
+            long parallelTime = 0;
+            byte sizeOfMatrix = 1;
+
+            var matricesMultiplier = new MatricesMultiplier();
+            var matricesMultiplierParallel = new MatricesMultiplierParallel();
+
+            while (synchronousTime <= parallelTime)
+            {
+                var firstMatrix = new Matrix(sizeOfMatrix, sizeOfMatrix, true);
+                var secondMatrix = new Matrix(sizeOfMatrix, sizeOfMatrix, true);
+
+                synchronousTime = GetMultiplyTime(matricesMultiplier, firstMatrix, secondMatrix);
+                parallelTime = GetMultiplyTime(matricesMultiplierParallel, firstMatrix, secondMatrix);
+
+                ++sizeOfMatrix;
+            }
+
+            Assert.IsTrue(synchronousTime > parallelTime, 
+                $"sizeOfMatrix: {sizeOfMatrix,-3}; " +
+                $"synchronous: {synchronousTime,-7} ticks; " +
+                $"- parallel: {parallelTime,-7} ticks.");
         }
 
         #region private methods
-
+        private static long GetMultiplyTime(IMatricesMultiplier multiplier, IMatrix firstMatrix, IMatrix secondMatrix)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            multiplier.Multiply(firstMatrix, secondMatrix);
+            watch.Stop();
+            return watch.ElapsedTicks;
+        }
         void TestMatrix3On3(IMatricesMultiplier matrixMultiplier)
         {
             if (matrixMultiplier == null)
@@ -70,7 +97,6 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
             Assert.AreEqual(213, multiplied.GetElement(2, 1));
             Assert.AreEqual(728, multiplied.GetElement(2, 2));
         }
-
         #endregion
     }
 }
