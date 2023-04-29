@@ -14,7 +14,6 @@ namespace MultiThreading.Task5.Threads.SharedCollection
     class Program
     {
         private static List<int> sharedCollection = new();
-        private static object lockObject = new();
         private const int ELEMENTS_COUNT = 10;
 
         static void Main(string[] args)
@@ -23,7 +22,7 @@ namespace MultiThreading.Task5.Threads.SharedCollection
             Console.WriteLine("the first one should add 10 elements into the collection" +
                 " and the second should print all elements in the collection after each adding.");
             Console.WriteLine("Use Thread, ThreadPool or Task classes for thread creation and any kind of synchronization constructions.");
-            Console.WriteLine();
+            Console.WriteLine("\n");
 
             // feel free to add your code
             Task.Run(() => AddElements(ELEMENTS_COUNT));
@@ -35,11 +34,9 @@ namespace MultiThreading.Task5.Threads.SharedCollection
         {
             for (int i = 0; i < count; i++)
             {
-                lock (lockObject)
-                {
-                    sharedCollection.Add(i);
-                    Console.WriteLine($"Added {i}");
-                }
+                sharedCollection.Add(i);
+                Console.WriteLine($"Added {i}");
+
                 Thread.Sleep(500);//imitate the delays to show the process queue in console.
             }
         }
@@ -48,22 +45,18 @@ namespace MultiThreading.Task5.Threads.SharedCollection
             var printedElements = 0;
             while (true)
             {
-                lock (lockObject)
-                {
-                    if (sharedCollection.Count == 0)
-                        continue;
+                if (sharedCollection.Count == 0)
+                    continue;
 
-                    if (printedElements < sharedCollection.Count)
-                    {
-                        Console.WriteLine($"Printed {sharedCollection[printedElements]}");
-                        ++printedElements;
-                    }
-                    if (printedElements == ELEMENTS_COUNT)
-                    {
-                        Console.WriteLine("\nAll elements printed");
-                        Console.WriteLine("Press any key to exit...");
-                        break;
-                    }
+                if (printedElements < sharedCollection.Count)
+                {
+                    Console.WriteLine($"Printed {sharedCollection[printedElements]}");
+                    ++printedElements;
+                }
+                if (printedElements == ELEMENTS_COUNT)
+                {
+                    Console.WriteLine("\n\nAll elements printed. Press 'Enter' to exit.");
+                    break;
                 }
                 Thread.Sleep(500);//imitate the delays to show the process queue in console.
             }
