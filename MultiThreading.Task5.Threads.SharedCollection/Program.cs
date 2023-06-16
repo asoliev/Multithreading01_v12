@@ -7,14 +7,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MultiThreading.Task5.Threads.SharedCollection
 {
     class Program
     {
-        private static List<int> sharedCollection = new();
         private const int ELEMENTS_COUNT = 10;
+
+        private static readonly List<int> collection = new List<int>();
+        private static readonly ManualResetEventSlim event1 = new ManualResetEventSlim(true);
+        private static readonly ManualResetEventSlim event2 = new ManualResetEventSlim(false);
 
         static void Main(string[] args)
         {
@@ -25,40 +27,44 @@ namespace MultiThreading.Task5.Threads.SharedCollection
             Console.WriteLine("\n");
 
             // feel free to add your code
-            Task.Run(() => AddElements(ELEMENTS_COUNT));
-            Task.Run(() => PrintElements());
+
+            Thread thread1 = new Thread(AddElements) { Name = "Thread 1", };
+            Thread thread2 = new Thread(PrintElements) { Name = "Thread 2" };
+            thread1.Start(ELEMENTS_COUNT);
+            thread2.Start(ELEMENTS_COUNT);
+            thread1.Join();
+            thread2.Join();
+
+            Console.WriteLine("Finished!");
 
             Console.ReadLine();
         }
-        private static void AddElements(int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                sharedCollection.Add(i);
-                Console.WriteLine($"Added {i}");
 
-                Thread.Sleep(500);//imitate the delays to show the process queue in console.
+        private static void AddElements(object elementsCount)
+        {
+            var count = (int)elementsCount;
+
+            for (int i = 1; i <= count; i++)
+            {
+                event1.Wait();
+                collection.Add(i);
+                Console.WriteLine($"{Thread.CurrentThread.Name} Added element {i} to the collection");
+                event1.Reset();
+                event2.Set();
             }
         }
-        private static void PrintElements()
-        {
-            var printedElements = 0;
-            while (true)
-            {
-                if (sharedCollection.Count == 0)
-                    continue;
 
-                if (printedElements < sharedCollection.Count)
-                {
-                    Console.WriteLine($"Printed {sharedCollection[printedElements]}");
-                    ++printedElements;
-                }
-                if (printedElements == ELEMENTS_COUNT)
-                {
-                    Console.WriteLine("\n\nAll elements printed. Press 'Enter' to exit.");
-                    break;
-                }
-                Thread.Sleep(500);//imitate the delays to show the process queue in console.
+        private static void PrintElements(object elementsCount)
+        {
+            var count = (int)elementsCount;
+            while (collection.Count < count)
+            {
+                event2.Wait();
+                Console.Write($"{Thread.CurrentThread.Name} prints collection: ");
+                Console.WriteLine($"[{string.Join(",", collection)}]");
+                Console.WriteLine();
+                event2.Reset();
+                event1.Set();
             }
         }
     }

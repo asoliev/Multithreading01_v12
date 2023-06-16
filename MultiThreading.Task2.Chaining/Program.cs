@@ -11,9 +11,10 @@ using System.Threading.Tasks;
 
 namespace MultiThreading.Task2.Chaining
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        private const int ARRAY_SIZE = 10;
+        public static async Task Main()
         {
             Console.WriteLine(".Net Mentoring Program. MultiThreading V1 ");
             Console.WriteLine("2.	Write a program, which creates a chain of four Tasks.");
@@ -23,39 +24,55 @@ namespace MultiThreading.Task2.Chaining
             Console.WriteLine("Fourth Task – calculates the average value. All this tasks should print the values to console");
             Console.WriteLine();
 
-            var task1 = Task.Run(() => GenerateRandomArray());
-
-            var multiples = task1.ContinueWith(x => MultiplyArray(task1.Result));
-
-            var orderedArray = multiples.ContinueWith(x => multiples.Result.OrderBy(t => t));
-
-            var avg = orderedArray.ContinueWith(x => orderedArray.Result.Average(t => t));
-
-            Console.WriteLine(avg.Result);
-
+            await Task.Run(() => GenerateRandomArray(ARRAY_SIZE))
+                .ContinueWith(x => MultiplyArray(x.Result))
+                .ContinueWith(x => SortArray(x.Result))
+                .ContinueWith(x => GetAvarage(x.Result));
+            
             Console.ReadLine();
         }
-        private static int[] GenerateRandomArray()
+
+        private static int[] GenerateRandomArray(int size)
         {
             var rnd = new Random();
-            var array = new int[10];
-            for (int i = 0; i < 10; i++)
+            var array = new int[size];
+            for (int i = 0; i < size; i++)
             {
                 array[i] = rnd.Next(10, 100);
             }
-            Console.WriteLine(string.Join(", ", array));
+            Console.WriteLine($"Initial array is [{string.Join(", ", array)}].");
             return array;
         }
-        private static int[] MultiplyArray(int[] array1)
+
+        private static int[] MultiplyArray(int[] arr)
         {
-            int[] array2 = GenerateRandomArray();
-            int[] multiple = new int[array1.Length];
-            for (int i = 0; i < 10; i++)
+            //Pay attention on requirements
+            //Have to multiply by a random number not by a random array
+            var rnd = new Random();
+            var val = rnd.Next(10, 100);
+            int[] multiple = new int[arr.Length];
+            for (int i = 0; i < arr.Length; i++)
             {
-                multiple[i] = array1[i] * array2[i];
+                multiple[i] = arr[i] * val;
             }
-            Console.WriteLine(string.Join(", ", multiple));
+            Console.WriteLine($"Initial array multiply by {val} is [{string.Join(", ", multiple)}].");
             return multiple;
+        }
+
+        private static int[] SortArray(int[] arr)
+        {
+            int[] sorted = arr.OrderBy(i => i).ToArray();
+
+            Console.WriteLine($"Sorted array is [{string.Join(", ", sorted)}].");
+            return sorted;
+        }
+
+        private static double GetAvarage(int[] arr)
+        {
+            var average = arr.Average(i => i);
+
+            Console.WriteLine($"Average of the sorted array is {average}.");
+            return average;
         }
     }
 }

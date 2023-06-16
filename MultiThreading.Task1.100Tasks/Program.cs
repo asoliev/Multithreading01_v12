@@ -39,7 +39,9 @@ namespace MultiThreading.Task1._100Tasks
         {
             return Task.Run(() =>
             {
-                for (int j = 0; j < MaxIterationsCount; j++)
+                //Pay attention on requirements
+                //Have to be from 1..1000 NOT from 0..999
+                for (int j = 1; j <= MaxIterationsCount; j++)
                 {
                     Output(taskNumber, j);
                 }
